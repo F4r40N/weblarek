@@ -5,7 +5,7 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-export type TPayment = 'online' | 'cash';
+export type TPayment = 'card' | 'cash';
 
 export interface IProduct {
     id: string; // Уникальный идентификатор товара
@@ -17,7 +17,7 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-    payment: TPayment; // Способ оплаты
+    payment: TPayment | null;  // Способ оплаты, может быть null
     email: string; // Email покупателя
     phone: string; // Телефон покупателя
     address: string; // Адрес доставки
@@ -33,4 +33,33 @@ export interface IOrderData {
 export interface IOrderResponse {
     orderId: string;     // Идентификатор созданного заказа
     status: string;      // Статус ответа, например "success"
+}
+
+// Интерфейсы для данных View
+export interface IHeaderData {
+  count: number;
+}
+
+export interface IGalleryData {
+  items: HTMLElement[];
+}
+
+export interface IModalData {
+  content: HTMLElement;
+}
+
+export interface IBasketData {
+  items: IProduct[];
+  total: number;
+}
+
+export interface ISuccessData {
+  total: number;
+}
+
+export interface IFormData {
+  payment?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
 }

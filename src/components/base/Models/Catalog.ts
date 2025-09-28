@@ -1,38 +1,36 @@
-import { IProduct } from '../../../types/index'; // Импорт интерфейса IProduct
+import { IProduct } from '../../../types/index';
+import { EventEmitter } from '../Events';
 
-// Класс Catalog отвечает за хранение и управление данными о товарах в каталоге
 export class Catalog {
-    private _items: IProduct[]; // Массив всех товаров в каталоге
-    private _preview: IProduct | null; // Текущий товар для подробного отображения
+  private _items: IProduct[];
+  private _preview: IProduct | null;
+  private events: EventEmitter;
 
-    // Конструктор инициализирует пустые массивы для хранения данных
-    constructor() {
-        this._items = [];
-        this._preview = null;
-    }
+  constructor(events: EventEmitter) {
+    this._items = [];
+    this._preview = null;
+    this.events = events;
+  }
 
-    // Сохраняет массив товаров в поле _items
-    setItems(items: IProduct[]): void {
-        this._items = items;
-    }
+  setItems(items: IProduct[]): void {
+    this._items = items;
+    this.events.emit('catalog:itemsChanged', this._items);
+  }
 
-    // Возвращает массив всех товаров из поля _items
-    getItems(): IProduct[] {
-        return this._items;
-    }
+  getItems(): IProduct[] {
+    return this._items;
+  }
 
-    // Возвращает товар по идентификатору или undefined, если не найден
-    getItem(id: string): IProduct | undefined {
-        return this._items.find(item => item.id === id);
-    }
+  getItem(id: string): IProduct | undefined {
+    return this._items.find(item => item.id === id);
+  }
 
-    // Сохраняет товар для подробного отображения в поле _preview
-    setPreview(item: IProduct): void {
-        this._preview = item;
-    }
+  setPreview(item: IProduct): void {
+    this._preview = item;
+    this.events.emit('catalog:previewChanged', this._preview);
+  }
 
-    // Возвращает текущий товар для подробного отображения или null
-    getPreview(): IProduct | null {
-        return this._preview;
-    }
+  getPreview(): IProduct | null {
+    return this._preview;
+  }
 }

@@ -1,90 +1,99 @@
-import { IBuyer, TPayment } from '../../../types/index'; // Импорт интерфейса IBuyer и типа TPayment
+import { IBuyer, TPayment } from '../../../types/index';
+import { EventEmitter } from '../Events';
 
-// Класс Buyer отвечает за хранение и управление данными о покупателе
 export class Buyer {
-    private _payment: TPayment | null; // Способ оплаты
-    private _email: string; // Email покупателя
-    private _phone: string; // Телефон покупателя
-    private _address: string; // Адрес доставки
+  private _payment: TPayment | null;
+  private _email: string;
+  private _phone: string;
+  private _address: string;
+  private events: EventEmitter;
 
-    // Конструктор инициализирует пустые поля для данных покупателя
-    constructor() {
-        this._payment = null;
-        this._email = '';
-        this._phone = '';
-        this._address = '';
-    }
+  constructor(events: EventEmitter) {
+    this._payment = null;
+    this._email = '';
+    this._phone = '';
+    this._address = '';
+    this.events = events;
+  }
 
-    // Сохраняет способ оплаты в поле _payment
-    setPayment(payment: TPayment): void {
-        this._payment = payment;
-    }
+  setPayment(payment: TPayment): void {
+    this._payment = payment;
+    this.events.emit('buyer:changed', this.getBuyerData());
+  }
 
-    // Возвращает способ оплаты из поля _payment
-    getPayment(): TPayment | null {
-        return this._payment;
-    }
+  getPayment(): TPayment | null {
+    return this._payment;
+  }
 
-    // Сохраняет email в поле _email
-    setEmail(email: string): void {
-        this._email = email;
+  setEmail(email: string): void {
+    this._email = email;
+    if (this._payment !== null) {
+      this.events.emit('buyer:changed', this.getBuyerData());
     }
+  }
 
-    // Возвращает email из поля _email
-    getEmail(): string {
-        return this._email;
-    }
+  getEmail(): string {
+    return this._email;
+  }
 
-    // Сохраняет телефон в поле _phone
-    setPhone(phone: string): void {
-        this._phone = phone;
+  setPhone(phone: string): void {
+    this._phone = phone;
+    if (this._payment !== null) {
+      this.events.emit('buyer:changed', this.getBuyerData());
     }
+  }
 
-    // Возвращает телефон из поля _phone
-    getPhone(): string {
-        return this._phone;
-    }
+  getPhone(): string {
+    return this._phone;
+  }
 
-    // Сохраняет адрес в поле _address
-    setAddress(address: string): void {
-        this._address = address;
+  setAddress(address: string): void {
+    this._address = address;
+    if (this._payment !== null) {
+      this.events.emit('buyer:changed', this.getBuyerData());
     }
+  }
 
-    // Возвращает адрес из поля _address
-    getAddress(): string {
-        return this._address;
-    }
+  getAddress(): string {
+    return this._address;
+  }
 
-    // Возвращает объект с данными покупателя в формате IBuyer
-    getBuyerData(): IBuyer {
-        if (!this._payment) {
-            throw new Error('Payment method is not set');
-        }
-        return {
-            payment: this._payment,
-            email: this._email,
-            phone: this._phone,
-            address: this._address
-        };
+  getBuyerData(): IBuyer {
+    if (this._payment === null) {
+      throw new Error('Не указан способ оплаты');
     }
+    return {
+      payment: this._payment,
+      email: this._email,
+      phone: this._phone,
+      address: this._address
+    };
+  }
 
-    // Очищает все поля данных покупателя
-    clear(): void {
-        this._payment = null;
-        this._email = '';
-        this._phone = '';
-        this._address = '';
-    }
+  validate(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanPhone = this._phone.replace(/[\s-]/g, '');
+    const phoneRegex = /^\+7\d{10}$/;
+    return (
+      this._payment !== null &&
+      emailRegex.test(this._email) &&
+      phoneRegex.test(cleanPhone) &&
+      this._address.trim() !== ''
+    );
+  }
 
-    // Проверяет корректность данных покупателя
-    validate(): boolean {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/; // Простой regex для российского телефона
-        return (
-            this._payment !== null &&
-            emailRegex.test(this._email) &&
-            phoneRegex.test(this._phone) &&
-            this._address.trim() !== ''
-        );
-    }
+  validateContacts(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanPhone = this._phone.replace(/[\s-]/g, '');
+    const phoneRegex = /^\+7\d{10}$/;
+    return emailRegex.test(this._email) && phoneRegex.test(cleanPhone);
+  }
+
+  clear(): void {
+    this._payment = null;
+    this._email = '';
+    this._phone = '';
+    this._address = '';
+    // Не emit'им после clear
+  }
 }

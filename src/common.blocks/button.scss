@@ -17,4 +17,13 @@
     @include mixins.button(white, $primaryLight, $primaryLight);
     border: $hoverBorder;
   }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.25;
+    pointer-events: none;
+    &:hover {
+      background: unset;
+    }
+  }
 }

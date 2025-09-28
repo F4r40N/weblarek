@@ -36,3 +36,11 @@
     }
   }
 }
+
+// Добавлены стили для подсказки адреса
+.address-hint {
+  display: none; // Скрыта по умолчанию
+  font-size: 1.2rem;
+  margin-left: 48px; // Отступ 48px от кнопки
+  white-space: nowrap;
+}
