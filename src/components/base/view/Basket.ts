@@ -10,7 +10,7 @@ export class Basket extends Component<IBasketData> {
   constructor(container: HTMLElement, private events: EventEmitter) {
     super(container);
     this.list = container.querySelector('.basket__list') as HTMLUListElement;
-    this.total = container.querySelector('.basket__price') as HTMLSpanElement;
+    this.total = container.querySelector('.basket__price, .basket__total-price') as HTMLSpanElement;
     this.button = container.querySelector('.basket__button') as HTMLButtonElement;
 
     // Установка слушателя на клик по кнопке оформления

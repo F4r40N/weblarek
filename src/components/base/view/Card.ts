@@ -3,47 +3,49 @@ import { IProduct } from '../../../types/index';
 import { categoryMap, CDN_URL } from '../../../utils/constants';
 
 export abstract class Card extends Component<IProduct> {
-  private category: HTMLSpanElement;
-  private title: HTMLHeadingElement;
-  private image: HTMLImageElement;
-  private price: HTMLSpanElement;
+  protected categoryElement: HTMLElement | null;
+  protected titleElement: HTMLElement | null;
+  protected imageElement: HTMLImageElement | null;
+  protected priceElement: HTMLElement | null;
+  protected _id = '';
 
   constructor(container: HTMLElement) {
     super(container);
-    this.category = container.querySelector('.card__category') as HTMLSpanElement;
-    this.title = container.querySelector('.card__title') as HTMLHeadingElement;
-    this.image = container.querySelector('.card__image') as HTMLImageElement;
-    this.price = container.querySelector('.card__price') as HTMLSpanElement;
+    this.categoryElement = container.querySelector('.card__category');
+    this.titleElement = container.querySelector('.card__title, .basket__item-title');
+    this.imageElement =
+      container.querySelector('img.card__image') ??
+      container.querySelector('.card__image img');
+    this.priceElement = container.querySelector('.card__price, .basket__item-price');
   }
 
-  render(data?: Partial<IProduct>): HTMLElement {
-    if (data) {
-      if (data.category) this.setCategory(data.category);
-      if (data.title) this.setTitle(data.title);
-      if (data.image) this.setImage(data.image);
-      if (data.price !== undefined) this.setPrice(data.price);
-    }
-    return this.container;
+  set id(value: string) {
+    this._id = value;
   }
 
-  setCategory(category: string): void {
-    if (this.category) {
-      this.category.textContent = category;
-      this.category.className = `card__category ${categoryMap[category as keyof typeof categoryMap] || ''}`;
-    }
+  get id(): string {
+    return this._id;
   }
 
-  setTitle(title: string): void {
-    this.title.textContent = title;
+  set category(value: string) {
+    if (!this.categoryElement) return;
+    this.categoryElement.textContent = value;
+    this.categoryElement.className = `card__category ${categoryMap[value as keyof typeof categoryMap] || ''}`;
   }
 
-  setImage(src: string): void {
-    // Убираем ведущий слэш, если есть, чтобы корректно сконкатенировать URL
+  set title(value: string) {
+    if (!this.titleElement) return;
+    this.titleElement.textContent = value;
+  }
+
+  set image(src: string) {
+    if (!this.imageElement) return;
     const cleanSrc = src.startsWith('/') ? src.slice(1) : src;
-    super.setImage(this.image, `${CDN_URL}/${cleanSrc}`);
+    this.setImage(this.imageElement, `${CDN_URL}/${cleanSrc}`);
   }
 
-  setPrice(price: number | null): void {
-    this.price.textContent = price === null ? 'Бесплатно' : `${price} синапсов`;
+  set price(price: number | null) {
+    if (!this.priceElement) return;
+    this.priceElement.textContent = price === null ? 'Бесплатно' : `${price} синапсов`;
   }
 }

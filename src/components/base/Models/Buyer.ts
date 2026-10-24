@@ -18,7 +18,7 @@ export class Buyer {
 
   setPayment(payment: TPayment): void {
     this._payment = payment;
-    this.events.emit('buyer:changed', this.getBuyerData());
+    this.events.emit('buyer:changed', {});
   }
 
   getPayment(): TPayment | null {
@@ -27,9 +27,7 @@ export class Buyer {
 
   setEmail(email: string): void {
     this._email = email;
-    if (this._payment !== null) {
-      this.events.emit('buyer:changed', this.getBuyerData());
-    }
+    this.events.emit('buyer:changed', {});
   }
 
   getEmail(): string {
@@ -38,9 +36,7 @@ export class Buyer {
 
   setPhone(phone: string): void {
     this._phone = phone;
-    if (this._payment !== null) {
-      this.events.emit('buyer:changed', this.getBuyerData());
-    }
+    this.events.emit('buyer:changed', {});
   }
 
   getPhone(): string {
@@ -49,9 +45,7 @@ export class Buyer {
 
   setAddress(address: string): void {
     this._address = address;
-    if (this._payment !== null) {
-      this.events.emit('buyer:changed', this.getBuyerData());
-    }
+    this.events.emit('buyer:changed', {});
   }
 
   getAddress(): string {
@@ -59,9 +53,6 @@ export class Buyer {
   }
 
   getBuyerData(): IBuyer {
-    if (this._payment === null) {
-      throw new Error('Не указан способ оплаты');
-    }
     return {
       payment: this._payment,
       email: this._email,
@@ -70,23 +61,37 @@ export class Buyer {
     };
   }
 
-  validate(): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cleanPhone = this._phone.replace(/[\s-]/g, '');
-    const phoneRegex = /^\+7\d{10}$/;
-    return (
-      this._payment !== null &&
-      emailRegex.test(this._email) &&
-      phoneRegex.test(cleanPhone) &&
-      this._address.trim() !== ''
-    );
+  /** Ошибки шага 1: способ оплаты и адрес. */
+  validateOrder(): Record<string, string> {
+    const errors: Record<string, string> = {};
+    if (this._payment === null) {
+      errors.payment = 'Необходимо указать способ оплаты';
+    }
+    if (this._address.trim() === '') {
+      errors.address = 'Необходимо указать адрес';
+    }
+    return errors;
   }
 
-  validateContacts(): boolean {
+  /** Ошибки шага 2: email и телефон. */
+  validateContacts(): Record<string, string> {
+    const errors: Record<string, string> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cleanPhone = this._phone.replace(/[\s-]/g, '');
     const phoneRegex = /^\+7\d{10}$/;
-    return emailRegex.test(this._email) && phoneRegex.test(cleanPhone);
+
+    if (this._email.trim() === '' || !emailRegex.test(this._email)) {
+      errors.email = 'Необходимо указать email';
+    }
+    if (this._phone.trim() === '' || !phoneRegex.test(cleanPhone)) {
+      errors.phone = 'Необходимо указать телефон';
+    }
+    return errors;
+  }
+
+  /** Полная проверка всех полей (для совместимости / финальной сборки). */
+  validate(): Record<string, string> {
+    return { ...this.validateOrder(), ...this.validateContacts() };
   }
 
   clear(): void {
@@ -94,6 +99,5 @@ export class Buyer {
     this._email = '';
     this._phone = '';
     this._address = '';
-    // Не emit'им после clear
   }
 }

@@ -3,7 +3,7 @@ import { IGalleryData } from '../../../types/index';
 import { EventEmitter } from '../Events';
 
 export class Gallery extends Component<IGalleryData> {
-  constructor(container: HTMLElement, private events: EventEmitter) {
+  constructor(container: HTMLElement, _events: EventEmitter) {
     super(container);
   }
 

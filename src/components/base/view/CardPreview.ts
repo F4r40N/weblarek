@@ -1,51 +1,41 @@
 import { Card } from './Card';
 import { EventEmitter } from '../Events';
-import { Basket } from '../Models/Basket';
+import { IProduct } from '../../../types/index';
 
 export class CardPreview extends Card {
   private button: HTMLButtonElement;
-  private description: HTMLParagraphElement;
-  private basket: Basket;
+  private descriptionElement: HTMLParagraphElement;
 
-  constructor(container: HTMLElement, private events: EventEmitter, basket: Basket) {
+  constructor(container: HTMLElement, private events: EventEmitter) {
     super(container);
     this.button = container.querySelector('.card__button') as HTMLButtonElement;
-    this.description = container.querySelector('.card__text') as HTMLParagraphElement;
-    this.basket = basket;
+    this.descriptionElement = container.querySelector('.card__text') as HTMLParagraphElement;
 
-    // В обработчик добавляем параметр event и предотвращаем всплытие
     this.button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      this.events.emit('card:preview:add', this.container.dataset);
+      this.events.emit('card:preview:add', { id: this.id });
     });
   }
 
-  render(data?: Partial<IProduct>): HTMLElement {
-    if (data?.description) {
-      this.setDescription(data.description);
-    }
-    super.render(data);
+  set description(value: string) {
+    this.descriptionElement.textContent = value;
+  }
 
-    // Логика для кнопки: проверка наличия в корзине и цены
-    const id = this.container.dataset.id;
+  render(data?: Partial<IProduct> & { inBasket?: boolean }): HTMLElement {
+    const inBasket = data?.inBasket ?? false;
+    const { inBasket: _inBasket, ...productData } = data ?? {};
+    super.render(productData);
+
     const price = data?.price ?? null;
     if (price === null) {
       this.button.textContent = 'Недоступно';
       this.button.disabled = true;
     } else {
-      if (this.basket.hasItem(id!)) {
-        this.button.textContent = 'Удалить из корзины';
-      } else {
-        this.button.textContent = 'В корзину';
-      }
+      this.button.textContent = inBasket ? 'Удалить из корзины' : 'В корзину';
       this.button.disabled = false;
     }
 
     return this.container;
-  }
-
-  setDescription(description: string): void {
-    this.description.textContent = description;
   }
 }

@@ -17,7 +17,7 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-    payment: TPayment | null;  // Способ оплаты, может быть null
+    payment: TPayment | null;  // Изменено: теперь опционально, может быть null // Способ оплаты
     email: string; // Email покупателя
     phone: string; // Телефон покупателя
     address: string; // Адрес доставки
@@ -49,7 +49,7 @@ export interface IModalData {
 }
 
 export interface IBasketData {
-  items: IProduct[];
+  items: HTMLElement[];
   total: number;
 }
 

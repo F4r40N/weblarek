@@ -1,16 +1,20 @@
 import { Form } from './Form';
 import { EventEmitter } from '../Events';
+import { IFormData } from '../../../types/index';
 
 export class ContactsForm extends Form {
   private emailInput: HTMLInputElement;
   private phoneInput: HTMLInputElement;
+  private emailError: HTMLElement | null;
+  private phoneError: HTMLElement | null;
 
   constructor(container: HTMLElement, events: EventEmitter) {
     super(container, events);
     this.emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
     this.phoneInput = container.querySelector('input[name="phone"]') as HTMLInputElement;
+    this.emailError = container.querySelector('.email-error');
+    this.phoneError = container.querySelector('.phone-error');
 
-    // Установка слушателей на ввод
     this.emailInput.addEventListener('input', () => {
       this.events.emit('form:contacts:change', { email: this.emailInput.value });
     });
@@ -19,21 +23,25 @@ export class ContactsForm extends Form {
     });
   }
 
-  render(data?: Partial<IFormData>): HTMLElement {
-    if (data?.email) {
-      this.emailInput.value = data.email;
+  setErrors(errors: Record<string, string> | string): void {
+    if (typeof errors === 'string') {
+      if (this.emailError) this.emailError.textContent = errors;
+      if (this.phoneError) this.phoneError.textContent = '';
+      super.setErrors(errors);
+      return;
     }
-    if (data?.phone) {
-      this.phoneInput.value = data.phone;
-    }
-    super.render(data);
-    return this.container;
+    if (this.emailError) this.emailError.textContent = errors.email ?? '';
+    if (this.phoneError) this.phoneError.textContent = errors.phone ?? '';
+    super.setErrors(errors);
   }
 
-  validate(): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cleanPhone = this.phoneInput.value.replace(/[\s-]/g, '');
-    const phoneRegex = /^\+7\d{10}$/;
-    return emailRegex.test(this.emailInput.value) && phoneRegex.test(cleanPhone);
+  render(data?: Partial<IFormData>): HTMLElement {
+    if (data?.email !== undefined) {
+      this.emailInput.value = data.email;
+    }
+    if (data?.phone !== undefined) {
+      this.phoneInput.value = data.phone;
+    }
+    return super.render(data);
   }
 }
