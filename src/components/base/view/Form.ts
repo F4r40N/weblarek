@@ -16,14 +16,18 @@ export abstract class Form extends Component<IFormData> {
     this.submitButton.disabled = !enabled;
   }
 
-  /** Показать ошибки полей из модели (Record) или служебную строку. */
+  /**
+   * Показать ошибку в единственном `.form__errors`.
+   * Record из модели — одна ошибка за раз (первое значение); string — как есть.
+   */
   setErrors(errors: Record<string, string> | string): void {
     if (!this.errors) return;
     if (typeof errors === 'string') {
       this.errors.textContent = errors;
       return;
     }
-    this.errors.textContent = Object.values(errors).join('; ');
+    const messages = Object.values(errors);
+    this.errors.textContent = messages[0] ?? '';
   }
 
   clearErrors(): void {
